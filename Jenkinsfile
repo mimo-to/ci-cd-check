@@ -3,14 +3,16 @@ pipeline {
 
     environment {
         IMAGE_NAME = "mimo017/ci-cd-check"
-        IMAGE_TAG = "${BUILD_NUMBER}"
+        IMAGE_TAG  = "${BUILD_NUMBER}"
     }
 
     stages {
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t $IMAGE_NAME:$IMAGE_TAG .'
+                sh '''
+                    docker build -t $IMAGE_NAME:$IMAGE_TAG .
+                '''
             }
         }
 
@@ -37,7 +39,7 @@ pipeline {
 
                         git clone git@github.com:mimo-to/ci-cd-check-manifest.git manifest-repo
 
-                        sed -i "s|image: .*|image: mimo017/ci-cd-check:${IMAGE_TAG}|g" \
+                        sed -i "s|image: mimo017/ci-cd-check:.*|image: mimo017/ci-cd-check:${IMAGE_TAG}|g" \
                         manifest-repo/k8s/deployment.yaml
 
                         cd manifest-repo
@@ -46,6 +48,7 @@ pipeline {
                         git config user.name "Jenkins"
 
                         git add .
+
                         git commit -m "Update image tag to ${IMAGE_TAG}" || true
 
                         git push origin main
